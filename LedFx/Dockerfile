@@ -14,20 +14,14 @@ RUN apk update && apk upgrade --no-cache && apk add --no-cache \
     python3-dev \
     eudev-dev
 
-# PIP UPGRADE
-RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel
+# 1. Mettre à jour pip et installer numpy et les outils de build dans le bon Python (/usr/local)
+RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel numpy>=2.0 meson-python "meson>=1.9.0" ninja
 
-# 1. Télécharger les sources d'aubio-ledfx
-RUN git clone https://github.com/LedFx/aubio-ledfx.git /tmp/aubio-ledfx
+# 2. Forcer le système à pointer sur les paquets de /usr/local pour éviter le conflit de chemins
+ENV PYTHONPATH="/usr/local/lib/python3.14/site-packages"
 
-# 2. Injecter numpy dans le pyproject.toml pour que pip l'installe dans son isolation
-RUN sed -i 's/requires = \[/requires = \["numpy>=2.0", /g' /tmp/aubio-ledfx/pyproject.toml
-
-# 3. Installer aubio-ledfx localement (cette fois, numpy sera présent dans l'isolation)
-RUN python3 -m pip install --no-cache-dir /tmp/aubio-ledfx
-
-# 4. Installer LedFx ensuite
-RUN python3 -m pip install --no-cache-dir ledfx==2.2.1
+# 3. Installer aubio-ledfx et ledfx sans isolation de build (ils verront enfin numpy au bon endroit)
+RUN python3 -m pip install --no-cache-dir --no-build-isolation aubio-ledfx==0.4.12 ledfx==2.2.1
 
 # SENDSPIN FIX
 RUN wget -qO "$(python3 -c 'import ledfx,os;print(os.path.dirname(ledfx.__file__))')/sendspin/stream.py" \
