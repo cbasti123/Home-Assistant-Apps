@@ -14,11 +14,11 @@ RUN apk update && apk upgrade --no-cache && apk add --no-cache \
     python3-dev \
     eudev-dev
 
-# INSTALL UV (Gère correctement la compilation de meson-python/numpy sur Alpine)
-RUN pip install --no-cache-dir uv
+# PYTHON PIP UPGRADE
+RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# INSTALL LEDFX VIA UV
-RUN uv pip install --system --no-cache-dir ledfx==2.2.1
+# INSTALL LEDFX (Sans --no-build-isolation pour que pip isole et compile aubio proprement)
+RUN python3 -m pip install --no-cache-dir ledfx==2.2.1
 
 # SENDSPIN FIX
 RUN wget -qO "$(python3 -c 'import ledfx,os;print(os.path.dirname(ledfx.__file__))')/sendspin/stream.py" \
