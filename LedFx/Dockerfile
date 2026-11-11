@@ -14,20 +14,10 @@ RUN apk update && apk upgrade --no-cache && apk add --no-cache \
     python3-dev \
     eudev-dev
 
-# PYTHON BUILD TOOLS
+# PYTHON PIP UPGRADE
 RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# NUMPY & MESON DEPENDENCIES (liés explicitement à python3)
-RUN python3 -m pip install --no-cache-dir \
-    "numpy>=2.0,<3" \
-    "meson-python" \
-    "meson>=1.9.0" \
-    ninja
-
-# INSTALL AUBIO-LEDFX SEPARATELY (avec isolation pour utiliser les outils installés ci-dessus)
-RUN python3 -m pip install --no-cache-dir aubio-ledfx==0.4.12
-
-# INSTALL LEDFX
+# INSTALL LEDFX (avec l'isolation standard pour que aubio-ledfx compile correctement son module numpy)
 RUN python3 -m pip install --no-cache-dir ledfx==2.2.1
 
 # SENDSPIN FIX
