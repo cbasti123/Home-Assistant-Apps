@@ -14,11 +14,21 @@ RUN apk update && apk upgrade --no-cache && apk add --no-cache \
     python3-dev \
     eudev-dev
 
-# PYTHON BUILD TOOLS, NUMPY & MESON
-RUN /usr/local/bin/python -m pip install --no-cache-dir --upgrade pip setuptools wheel "numpy>=2.0,<3" meson-python "meson>=1.9.0" ninja
+# PYTHON BUILD TOOLS
+RUN /usr/local/bin/python -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# INSTALL AUBIO AND LEDFX (avec isolation standard pour que meson-python trouve numpy dans l'environnement de build)
-RUN /usr/local/bin/python -m pip install --no-cache-dir aubio-ledfx==0.4.12 ledfx==2.2.1
+# NUMPY & MESON DEPENDENCIES FOR AUBIO BUILD
+RUN /usr/local/bin/python -m pip install --no-cache-dir \
+    "numpy>=2.0,<3" \
+    "meson-python" \
+    "meson>=1.9.0" \
+    ninja
+
+# INSTALL AUBIO-LEDFX SEPARATELY WITH EXPLICIT ENVIRONMENT
+RUN /usr/local/bin/python -m pip install --no-cache-dir --no-build-isolation aubio-ledfx==0.4.12
+
+# INSTALL LEDFX
+RUN /usr/local/bin/python -m pip install --no-cache-dir ledfx==2.2.1
 
 # SENDSPIN FIX
 RUN wget -qO "$(/usr/local/bin/python -c 'import ledfx,os;print(os.path.dirname(ledfx.__file__))')/sendspin/stream.py" \
