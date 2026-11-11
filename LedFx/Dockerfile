@@ -14,10 +14,16 @@ RUN apk update && apk upgrade --no-cache && apk add --no-cache \
     python3-dev \
     eudev-dev
 
-# PYTHON PIP UPGRADE
+# PYTHON PIP UPGRADE & BUILD TOOLS
 RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# INSTALL LEDFX (Sans --no-build-isolation pour laisser pip gérer l'environnement de build d'aubio)
+# 1. Installer les outils de build et numpy globalement
+RUN python3 -m pip install --no-cache-dir numpy meson-python "meson>=1.9.0" ninja
+
+# 2. Installer aubio-ledfx en amont avec le numpy global (--no-build-isolation)
+RUN python3 -m pip install --no-cache-dir --no-build-isolation aubio-ledfx==0.4.12
+
+# 3. Installer ledfx (qui verra aubio-ledfx déjà installé et ne plantera plus)
 RUN python3 -m pip install --no-cache-dir ledfx==2.2.1
 
 # SENDSPIN FIX
