@@ -14,16 +14,18 @@ RUN apk update && apk upgrade --no-cache && apk add --no-cache \
     python3-dev \
     eudev-dev
 
-# 1. Mettre à jour pip et installer numpy et les outils de build dans le bon Python (/usr/local)
-RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel numpy>=2.0 meson-python "meson>=1.9.0" ninja
+# BUILD TOOLS + NUMPY (les guillemets sont obligatoires : sans eux, ">" est une redirection shell)
+RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel \
+    "numpy>=2.0" meson-python "meson>=1.9.0" ninja
 
-# 2. Forcer le système à pointer sur les paquets de /usr/local pour éviter le conflit de chemins
-ENV PYTHONPATH="/usr/local/lib/python3.14/site-packages"
+# DIAGNOSTIC : si numpy est inutilisable, le build s'arrête ici avec la vraie erreur
+RUN python3 -c "import sys, numpy; print(sys.version); print(numpy.__version__, numpy.__file__)"
 
-# 3. Installer aubio-ledfx et ledfx sans isolation de build (ils verront enfin numpy au bon endroit)
-RUN python3 -m pip install --no-cache-dir --no-build-isolation aubio-ledfx==0.4.12 ledfx==2.2.1
+# APP (sans build isolation : aubio-ledfx utilise le numpy installé ci-dessus)
+RUN python3 -m pip install --no-cache-dir --no-build-isolation \
+    aubio-ledfx==0.4.12 ledfx==2.2.1
 
-# SENDSPIN FIX
+# SENDSPIN IS BROKEN IN CURRENT RELEASE, APPLYING FIX FROM MAINBRANCH
 RUN wget -qO "$(python3 -c 'import ledfx,os;print(os.path.dirname(ledfx.__file__))')/sendspin/stream.py" \
     https://raw.githubusercontent.com/LedFx/LedFx/d0423a6bd6c4044224515b35149a0e91a865cfe1/ledfx/sendspin/stream.py
 
