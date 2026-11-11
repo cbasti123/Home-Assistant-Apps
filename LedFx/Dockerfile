@@ -1,5 +1,5 @@
-# BASE HOME ASSISTANT (Épinglé en Python 3.13 pour éviter le bug de compilation de aubio sous Python 3.14)
-FROM ghcr.io/home-assistant/base-python:3.13-alpine3.23
+# BASE HOME ASSISTANT
+FROM ghcr.io/home-assistant/base-python:latest
 
 # DEPENDENCIES
 RUN apk update && apk upgrade --no-cache && apk add --no-cache \
@@ -14,10 +14,19 @@ RUN apk update && apk upgrade --no-cache && apk add --no-cache \
     python3-dev \
     eudev-dev
 
-# PYTHON PIP UPGRADE
+# PIP UPGRADE
 RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# INSTALL LEDFX (Fonctionnera directement sous Python 3.13)
+# 1. Télécharger les sources d'aubio-ledfx
+RUN git clone https://github.com/LedFx/aubio-ledfx.git /tmp/aubio-ledfx
+
+# 2. Injecter numpy dans le pyproject.toml pour que pip l'installe dans son isolation
+RUN sed -i 's/requires = \[/requires = \["numpy>=2.0", /g' /tmp/aubio-ledfx/pyproject.toml
+
+# 3. Installer aubio-ledfx localement (cette fois, numpy sera présent dans l'isolation)
+RUN python3 -m pip install --no-cache-dir /tmp/aubio-ledfx
+
+# 4. Installer LedFx ensuite
 RUN python3 -m pip install --no-cache-dir ledfx==2.2.1
 
 # SENDSPIN FIX
