@@ -1,5 +1,5 @@
-# BASE HOME ASSISTANT
-FROM ghcr.io/home-assistant/base-python:latest
+# BASE HOME ASSISTANT (Épinglé en Python 3.13 pour éviter le bug de compilation de aubio sous Python 3.14)
+FROM ghcr.io/home-assistant/base-python:3.13-alpine3.23
 
 # DEPENDENCIES
 RUN apk update && apk upgrade --no-cache && apk add --no-cache \
@@ -14,16 +14,10 @@ RUN apk update && apk upgrade --no-cache && apk add --no-cache \
     python3-dev \
     eudev-dev
 
-# PYTHON PIP UPGRADE & BUILD TOOLS
+# PYTHON PIP UPGRADE
 RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# INSTALL NUMPY & MESON DEPENDENCIES
-RUN python3 -m pip install --no-cache-dir numpy meson-python "meson>=1.9.0" ninja
-
-# INSTALL AUBIO-LEDFX DIRECTLY FROM GITHUB (Correction pour Python 3.14)
-RUN python3 -m pip install --no-cache-dir --no-build-isolation git+https://github.com/LedFx/aubio-ledfx.git
-
-# INSTALL LEDFX
+# INSTALL LEDFX (Fonctionnera directement sous Python 3.13)
 RUN python3 -m pip install --no-cache-dir ledfx==2.2.1
 
 # SENDSPIN FIX
