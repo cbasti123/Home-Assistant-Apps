@@ -17,7 +17,7 @@ RUN apk update && apk upgrade --no-cache && apk add --no-cache \
 # PYTHON PIP UPGRADE
 RUN python3 -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# INSTALL LEDFX (Sans --no-build-isolation pour que pip isole et compile aubio proprement)
+# INSTALL LEDFX (Sans --no-build-isolation pour laisser pip gérer l'environnement de build d'aubio)
 RUN python3 -m pip install --no-cache-dir ledfx==2.2.1
 
 # SENDSPIN FIX
